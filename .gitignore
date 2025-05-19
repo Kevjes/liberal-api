@@ -1,0 +1,26 @@
+# Environnements virtuels
+venv/
+.venv/
+
+# Fichiers Python compilés et cache
+__pycache__/
+*.py[cod]
+
+# Fichier des variables d'environnement (à ne pas versionner)
+.env
+
+# Base de données
+database.db
+
+# Fichiers de logs
+*.log
+
+# Fichiers système
+.DS_Store
+
+# Répertoires d'éditeurs
+.idea/
+.vscode/
+
+# fichiers statics
+static/

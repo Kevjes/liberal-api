@@ -1,0 +1,206 @@
+import datetime
+
+def reset_email_template(user_first_name: str, reset_link: str, expiration_time: str, user_email: str) -> str:
+    current_year = datetime.datetime.now().year
+    return """
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Menosi CLI</title>
+    <style>
+        /* Reset CSS */
+        body, p, h1, h2, h3 {{
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif; /* Fallback font */
+        }}
+
+        body {{
+            line-height: 1.6;
+            color: white;
+            background-color: #1E1E1E;
+            padding: 20px 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }}
+
+        .container {{
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #1E1E1E;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #444444;
+        }}
+
+        .header {{
+            background-color: #BE1522;
+            padding: 25px;
+            text-align: center;
+        }}
+
+        .logo {{
+            max-width: 180px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }}
+
+        .content {{
+            padding: 30px 40px;
+            color: white;
+        }}
+
+        h1 {{
+            color: white;
+            font-size: 22px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }}
+
+        p {{
+            margin-bottom: 18px;
+            font-size: 15px;
+            color: white;
+        }}
+
+        .subtle-text {{
+             color: #777777;
+             font-size: 14px;
+        }}
+
+        .reset-button {{
+            display: inline-block;
+            background-color: #BE1522;
+            color: white !important;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            margin: 25px 0;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            border: none; /* Pas de bordure */
+        }}
+        
+        .content a {{
+            color: #CCCCCC;
+            text-decoration: underline;
+        }}
+        
+        .content a:hover {{
+            color: #FFFFFF;
+        }}
+
+        .footer {{
+            background-color: #1E1E1E;
+            padding: 25px 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+            border-top: 1px solid #444444;
+        }}
+
+        .footer p {{
+            color: #777777;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }}
+        
+        .footer a {{
+            color: #999999;
+            text-decoration: none;
+        }}
+        
+        .footer a:hover {{
+            text-decoration: underline;
+        }}
+
+        .support-info {{
+            margin-top: 30px;
+            border-top: 1px solid #444444;
+            padding-top: 25px;
+            color: #777777;
+        }}
+        
+        .support-info p {{
+             color: #CCCCCC;
+             margin-bottom: 10px;
+             font-size: 14px;
+        }}
+
+        .support-info a {{
+            color: #CCCCCC; /* Liens de support */
+            text-decoration: none;
+        }}
+        
+        .support-info a:hover {{
+            color: #FFFFFF;
+            text-decoration: underline;
+        }}
+
+        /* Responsive adjustments (optional but recommended) */
+        @media screen and (max-width: 600px) {{
+            .content {{
+                padding: 20px 25px;
+            }}
+            .footer {{
+                 padding: 20px 25px;
+            }}
+            h1 {{
+                font-size: 20px;
+            }}
+            p {{
+                font-size: 14px;
+            }}
+            .reset-button {{
+                 padding: 10px 20px;
+                 font-size: 15px;
+            }}
+        }}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Menosi CLI Logo" class="logo">
+        </div>
+
+        <div class="content">
+            <h1>Reset your password</h1>
+
+            <p>Hello {user_first_name},</p>
+
+            <p>You have requested to reset your Menosi CLI password. Please click the following link to reset your password :</p>
+
+            <p style="text-align: center;"> <a href="{reset_link}" class="reset-button">Reset my password</a>
+            </p>
+
+            <p class="subtle-text">This link will expire in {expiration_time} minutes. If you have not requested to reset your password, you can ignore this email.</p>
+
+            <div class="support-info">
+                <p>Need help? Contact our support team:</p>
+                <p>📧 <a href="mailto:cli.support@menosi.net">cli.support@menosi.net</a></p>
+                <p>📞 +237 651 519 814</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>This email was sent to {user_email}</p>
+            <p>© {current_year} Menosi CLI. All rights reserved.</p>
+            </div>
+    </div>
+</body>
+</html>
+""".format(user_first_name=user_first_name, reset_link=reset_link, expiration_time=expiration_time, user_email=user_email, current_year=current_year)
+
+# Exemple d'utilisation :
+# user_name = "John"
+# link = "https://votre-site.com/reset?token=un_token_unique"
+# expiration = "30" # en minutes
+# email_address = "john.doe@example.com"
+# html_content = reset_email_template(user_name, link, expiration, email_address)
+# print(html_content) # Vous enverriez ce contenu par e-mail
