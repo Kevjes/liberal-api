@@ -9,7 +9,10 @@ from app.features.users.models import UserModel
 router = APIRouter(prefix="/department", tags=["departments"])
 
 @router.get("/all", response_model=list[DepartmentSchema])
-async def get_all_departments(service: DepartmentService = Depends(get_departments_service), admin: UserModel = Depends(get_current_admin)):
+async def get_all_departments(
+  service: DepartmentService = Depends(get_departments_service), 
+  # admin: UserModel = Depends(get_current_admin)
+):
   return await service.get_all()
 
 @router.get("/{id}", response_model=DepartmentSchema)

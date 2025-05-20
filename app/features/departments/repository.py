@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+# from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.features.departments.models import DepartmentModel
 import uuid
@@ -9,9 +9,7 @@ class DepartmentRepository:
         self.db = db
 
     async def get_all(self) -> list[DepartmentModel]:
-        result = await self.db.execute(select(DepartmentModel).options(
-            selectinload(DepartmentModel.apps),
-        ))
+        result = await self.db.execute(select(DepartmentModel))
         return list(result.unique().scalars().all())
         
     async def get_by_name(self, name: str) -> DepartmentModel | None:

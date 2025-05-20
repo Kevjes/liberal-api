@@ -136,8 +136,8 @@ class CardService:
 
         # 2. Photo du membre (Ex: coin supérieur gauche)
         photo_size = 20 * mm # Taille de la photo
-        photo_x = 5 * mm
-        photo_y = CARD_HEIGHT - photo_size - (5 * mm)
+        photo_x = CARD_WIDTH - photo_size - (8 * mm)
+        photo_y = CARD_HEIGHT - photo_size - (8 * mm)
         
         member_photo = await self._get_member_photo(card_data_model.image_url)
         if member_photo:
@@ -149,38 +149,38 @@ class CardService:
                 p.rect(photo_x, photo_y, photo_size, photo_size, fill=1) # Placeholder gris
 
         # 3. Informations textuelles
-        p.setFillColorRGB(0, 0, 0) # Couleur du texte (noir)
+        p.setFillColorRGB(1, 1, 1) # Couleur du texte (noir)
         
         # Nom et Prénom
-        text_start_x = photo_x + photo_size + (5*mm) # A droite de la photo
-        current_y = CARD_HEIGHT - (8 * mm)
-        p.setFont(settings.CARD_DEFAULT_FONT + "-Bold", 10) # Taille 10
-        p.drawString(text_start_x, current_y, f"{card_data_model.first_name} {card_data_model.last_name}")
+        text_start_x = (7*mm) # A droite de la photo
+        current_y = CARD_HEIGHT - (15 * mm)
+        p.setFont(settings.CARD_DEFAULT_FONT + "-Bold", 8) # Taille 10
+        p.drawString(photo_x, current_y + (8 * mm), f"N°: {card_data_model.number:04d}")
+        p.drawString(text_start_x, current_y, f"Nom: {card_data_model.first_name}")
+        p.drawString(text_start_x, current_y - (5 * mm), f"Prénom: {card_data_model.last_name}")
         
-        current_y -= (5 * mm)
-        p.setFont(settings.CARD_DEFAULT_FONT, 8) # Taille 8 pour les autres infos
-        
+        current_y -= (10 * mm)
         # Numéro de membre
-        p.drawString(text_start_x, current_y, f"ID: {card_data_model.number:06d}") # Formatté sur 6 chiffres avec zéros
-        current_y -= (4 * mm)
         
         # Statut
         p.drawString(text_start_x, current_y, f"Statut: {card_data_model.status}")
-        current_y -= (4 * mm)
-
+        current_y -= (5 * mm)
+        # Contact
+        p.drawString(text_start_x, current_y, f"Contact: {card_data_model.contact}")
+        current_y -= (5 * mm)
         # Département (Assurez-vous que department est chargé)
         department_name = card_data_model.department.name if card_data_model.department else "N/A"
-        p.drawString(5 * mm, 15 * mm, f"Département: {department_name}") # En bas à gauche
-
+        p.drawString(text_start_x, current_y, f"Département: {department_name}") # En bas à gauche
+        current_y -= (5 * mm)
         # Municipalité (Assurez-vous que municipality est chargé)
         municipality_name = card_data_model.municipality.name if card_data_model.municipality else "N/A"
-        p.drawString(5 * mm, 10 * mm, f"Commune: {municipality_name}")
+        p.drawString(text_start_x, current_y, f"Commune: {municipality_name}")
 
 
         # 4. QR Code (Ex: coin inférieur droit)
-        qr_code_size = 18 * mm
-        qr_x = CARD_WIDTH - qr_code_size - (3 * mm)
-        qr_y = 3 * mm
+        qr_code_size = 15 * mm
+        qr_x = CARD_WIDTH - qr_code_size - (7 * mm)
+        qr_y = 4 * mm
         if card_data_model.qr_code_url: # L'URL des données du QR Code
             try:
                 qr_image = await self._generate_qr_code_image(card_data_model.qr_code_url)

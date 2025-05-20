@@ -10,14 +10,12 @@ class CardRepository:
         self.db = db
 
     async def get_all(self) -> list[CardModel]:
-        result = await self.db.execute(select(CardModel).options(
-            selectinload(CardModel.apps),
-        ))
+        result = await self.db.execute(select(CardModel))
         return list(result.unique().scalars().all())
     
     async def get_by_id(self, id: uuid.UUID) -> CardModel | None:
         result = await self.db.execute(select(CardModel).filter(CardModel.id == id))
-        return result.scalars().first()
+        return result.unique().scalars().first()
     
     async def get_by_id_model(self, id: uuid.UUID) -> Optional[CardModel]:
         stmt = (
@@ -29,7 +27,7 @@ class CardRepository:
             )
         )
         result = await self.db.execute(stmt)
-        return result.scalars().one_or_none()
+        return result.unique().scalars().one_or_none()
     
     async def get_by_id_with_relations(self, id: uuid.UUID) -> Optional[CardModel]:
         stmt = select(CardModel).options(selectinload(CardModel.department), selectinload(CardModel.municipality)).where(CardModel.id == id)

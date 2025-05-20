@@ -1,8 +1,7 @@
-from io import BytesIO
 import io
 from typing import List, Optional
 import uuid
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
 from pydantic import EmailStr
 from app.core.helper import AppHelper
@@ -16,7 +15,10 @@ from app.core.config import settings
 router = APIRouter(prefix="/card", tags=["cards"])
 
 @router.get("/all", response_model=list[CardSchema])
-async def get_all_cards(service: CardService = Depends(get_cards_service), admin: UserModel = Depends(get_current_admin)):
+async def get_all_cards(
+  service: CardService = Depends(get_cards_service), 
+  # admin: UserModel = Depends(get_current_admin)
+):
   return await service.get_all()
 
 @router.get("/{id}", response_model=CardSchema)
@@ -25,7 +27,7 @@ async def get_card_by_id(id: uuid.UUID, service: CardService = Depends(get_cards
 
 @router.post("/", response_model=CardSchema)
 async def create_card(
-  image: UploadFile = Form(..., description="Profile image"),
+  image: UploadFile = File(..., description="Profile image"),
   first_name: str = Form(..., max_length=50, min_length=3, description="Card first name"),
   last_name: str = Form(..., max_length=50, min_length=3, description="Card last name"),
   contact: str = Form(..., max_length=50, min_length=3, description="Card contact"),
@@ -34,9 +36,10 @@ async def create_card(
   municipality_id: uuid.UUID = Form(...),
   email: EmailStr = Form(...) , 
   service: CardService = Depends(get_cards_service),
-  current_user: UserModel = Depends(get_current_user)
+  # current_user: UserModel = Depends(get_current_user)
 ):
   image_url = AppHelper.save_file(image, settings.PROFILE_IMAGE_DIR, image.filename)
+  creator_id = uuid.UUID("a74005d4-f142-43e7-acf4-680c0e8d5472") # current_user.id
   return await service.create(CreateCardSchema(
     first_name=first_name,
     last_name=last_name,
@@ -45,7 +48,7 @@ async def create_card(
     department_id=department_id,
     municipality_id=municipality_id,
     email=email,
-  ), image_url=image_url, creator_id=current_user.id)
+  ), image_url=image_url, creator_id=creator_id)
 
 @router.get("/{card_id}/pdf", response_class=StreamingResponse)
 async def get_card_pdf_endpoint(
@@ -54,13 +57,14 @@ async def get_card_pdf_endpoint(
 ):
     try:
         pdf_bytes = await service.generate_card_pdf_bytes(card_id)
+        print(f"PDF bytes: {pdf_bytes[:100]}...")  # Log the first 100 bytes for debugging
         return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=carte_membre_{card_id}.pdf"})
     except HTTPException as e:
         raise e
     except Exception as e:
         # Log l'erreur e
-        raise HTTPException(status_code=500, detail="Could not generate PDF card.")
+        raise HTTPException(status_code=500, detail=f"Could not generate PDF card.{str(e)}")
 
 
 @router.post("/{card_id}/send-email", status_code=status.HTTP_200_OK)

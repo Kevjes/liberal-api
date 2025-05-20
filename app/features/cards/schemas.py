@@ -27,7 +27,7 @@ class UpdateCardSchema(BaseModel):
 
 class CardSchema(BaseModel):
     id: uuid.UUID
-    number: str
+    number: int
     first_name: str
     last_name: str
     contact: str

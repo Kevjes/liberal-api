@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+# from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.features.municipalities.models import MunicipalityModel
 import uuid
@@ -9,9 +9,7 @@ class MunicipalityRepository:
         self.db = db
 
     async def get_all(self) -> list[MunicipalityModel]:
-        result = await self.db.execute(select(MunicipalityModel).options(
-            selectinload(MunicipalityModel.apps),
-        ))
+        result = await self.db.execute(select(MunicipalityModel))
         return list(result.unique().scalars().all())
         
     async def get_by_name(self, name: str) -> MunicipalityModel | None:

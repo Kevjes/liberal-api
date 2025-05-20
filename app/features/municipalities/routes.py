@@ -11,7 +11,10 @@ from app.features.users.models import UserModel
 router = APIRouter(prefix="/municipality", tags=["municipalities"])
 
 @router.get("/all", response_model=list[MunicipalitySchema])
-async def get_all_municipalities(service: MunicipalityService = Depends(get_municipalities_service), admin: UserModel = Depends(get_current_admin)):
+async def get_all_municipalities(
+  service: MunicipalityService = Depends(get_municipalities_service), 
+  # admin: UserModel = Depends(get_current_admin)
+):
   return await service.get_all()
 
 @router.get("/{id}", response_model=MunicipalitySchema)
