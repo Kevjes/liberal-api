@@ -12,10 +12,6 @@ class Settings(BaseSettings):
     SMTP_FROM: str
     ALGORITHM: str = "HS256"
     DOMAIN_URL: str
-    AES_USER_PASSWORD: str
-    ACTIVE_FREE_PLAN_FOR_NEW_USER: bool
-    FREE_PLAN_DURATION_IN_DAYS: int
-    CHROMIUM_EXECUTABLE_PATH: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 3600
     RESET_TOKEN_EXPIRE_MINUTES: int = 15
     STATIC_FILES_DIR: Path = Path("static")
