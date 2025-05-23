@@ -1,5 +1,5 @@
 import io
-from typing import List, Optional
+from typing import Optional
 import uuid
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
@@ -8,7 +8,7 @@ from app.core.helper import AppHelper
 from app.core.security import get_current_admin, get_current_user
 from app.features.cards.dependencies import get_cards_service
 from app.features.cards.services import CardService
-from app.features.cards.schemas import CardSchema, CreateCardSchema
+from app.features.cards.schemas import CardSchema, CreateCardSchema, UpdateCardSchema
 from app.features.users.models import UserModel
 from app.core.config import settings
 
@@ -36,10 +36,10 @@ async def create_card(
   municipality_id: uuid.UUID = Form(...),
   email: EmailStr = Form(...) , 
   service: CardService = Depends(get_cards_service),
-  # current_user: UserModel = Depends(get_current_user)
+  current_user: UserModel = Depends(get_current_user)
 ):
   image_url = AppHelper.save_file(image, settings.PROFILE_IMAGE_DIR, image.filename)
-  creator_id = uuid.UUID("a74005d4-f142-43e7-acf4-680c0e8d5472") # current_user.id
+  is_admin = current_user.is_admin
   return await service.create(CreateCardSchema(
     first_name=first_name,
     last_name=last_name,
@@ -48,29 +48,38 @@ async def create_card(
     department_id=department_id,
     municipality_id=municipality_id,
     email=email,
-  ), image_url=image_url, creator_id=creator_id)
+    is_active=True if is_admin else False,
+  ), image_url=image_url, creator_id=current_user.id)
 
-@router.get("/{card_id}/pdf", response_class=StreamingResponse)
+@router.get("/pdf/{card_id}", response_class=StreamingResponse)
 async def get_card_pdf_endpoint(
     card_id: uuid.UUID,
+    current_admin: UserModel = Depends(get_current_admin),
     service: CardService = Depends(get_cards_service)
 ):
     try:
         pdf_bytes = await service.generate_card_pdf_bytes(card_id)
-        print(f"PDF bytes: {pdf_bytes[:100]}...")  # Log the first 100 bytes for debugging
-        return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=carte_membre_{card_id}.pdf"})
+        if not pdf_bytes:
+            raise HTTPException(status_code=404, detail="Carte PDF introuvable.")
+        
+        return StreamingResponse(
+            io.BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename=carte_membre_{card_id}.pdf"
+            }
+        )
     except HTTPException as e:
         raise e
     except Exception as e:
-        # Log l'erreur e
-        raise HTTPException(status_code=500, detail=f"Could not generate PDF card.{str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur serveur: {str(e)}")
 
 
-@router.post("/{card_id}/send-email", status_code=status.HTTP_200_OK)
+@router.post("/send-email/{card_id}", status_code=status.HTTP_200_OK)
 async def send_card_email_endpoint(
     card_id: uuid.UUID,
-    recipient_email: Optional[str] = None, # Permet de spécifier un e-mail différent
+    recipient_email: Optional[str] = None,
+    current_admin: UserModel = Depends(get_current_admin),
     service: CardService = Depends(get_cards_service)
 ):
     try:
@@ -79,27 +88,42 @@ async def send_card_email_endpoint(
     except HTTPException as e:
         raise e
     except Exception as e:
-        # Log l'erreur e
         print(f"Error in send_card_email_endpoint: {e}")
         raise HTTPException(status_code=500, detail=f"Could not send card email: {str(e)}")
-
-# ... vos autres routes (GET, PUT, DELETE)
-@router.get("/", response_model=List[CardSchema])
-async def get_all_cards_endpoint(service: CardService = Depends(get_cards_service)):
-    return await service.get_all()
 
 @router.get("/{card_id}", response_model=CardSchema)
 async def get_card_by_id_endpoint(card_id: uuid.UUID, service: CardService = Depends(get_cards_service)):
     return await service.get_by_id(card_id)
 
 
-# @router.put("/", response_model=CardSchema)
-# async def update_cards(
-#   schema: UpdateCardSchema,
-#   service: CardService = Depends(get_cards_service),
-#   admin: UserModel = Depends(get_current_admin)
-# ):
-#   return await service.update(schema)
+@router.put("/", response_model=CardSchema)
+async def update_cards(
+  id: uuid.UUID = Form(...),
+  image: Optional[UploadFile] = File(None),
+  first_name: Optional[str] = Form(None),
+  last_name: Optional[str] = Form(None),
+  email: Optional[str] = Form(None),
+  contact: Optional[str] = Form(None),
+  status: Optional[str] = Form(None),
+  department_id: Optional[uuid.UUID] = Form(None),
+  municipality_id: Optional[uuid.UUID] = Form(None),
+  service: CardService = Depends(get_cards_service),
+  admin: UserModel = Depends(get_current_admin)
+):
+  image_url = None
+  if image: 
+    image_url = AppHelper.save_file(image, settings.PROFILE_IMAGE_DIR, image.filename)
+  return await service.update(schema=UpdateCardSchema(
+    id=id,
+    first_name=first_name,
+    last_name=last_name,
+    email=email,
+    contact=contact,
+    status=status,
+    department_id=department_id,
+    municipality_id=municipality_id,
+    is_active=True,
+  ), image_url=image_url)
 
 @router.delete("/{id}")
 async def delete_cards(id: uuid.UUID, service: CardService = Depends(get_cards_service), admin: UserModel = Depends(get_current_admin)):

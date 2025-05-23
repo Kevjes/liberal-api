@@ -8,7 +8,7 @@ def welcome_email_template(user_first_name: str, user_email: str, getting_starte
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Menosi CLI</title>
+    <title>Welcome to Liberal</title>
     <style>
         body, p, h1, h2, h3 {{
             margin: 0;
@@ -165,17 +165,17 @@ def welcome_email_template(user_first_name: str, user_email: str, getting_starte
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Menosi CLI Logo" class="logo">
+            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Liberal Logo" class="logo">
         </div>
 
         <div class="content">
-            <h1>Welcome to Menosi CLI!</h1>
+            <h1>Welcome to Liberal!</h1>
 
             <p>Hello {user_first_name},</p>
 
-            <p>We're excited to have you on board! Your Menosi CLI account associated with {user_email} has been successfully created.</p>
+            <p>We're excited to have you on board! Your Liberal account associated with {user_email} has been successfully created.</p>
             
-            <p>Menosi CLI helps you instantly generate 80%' of your code while respecting best coding practices. Menosi CLI also supports multiple frameworks.</p>
+            <p>Liberal helps you instantly generate 80%' of your code while respecting best coding practices. Liberal also supports multiple frameworks.</p>
 
             <p>One order, one time saving!</p>
 
@@ -195,7 +195,7 @@ def welcome_email_template(user_first_name: str, user_email: str, getting_starte
 
         <div class="footer">
             <p>This email was sent to {user_email}</p>
-            <p>© {current_year} Menosi CLI. All rights reserved.</p>
+            <p>© {current_year} Liberal. All rights reserved.</p>
         </div>
     </div>
 </body>

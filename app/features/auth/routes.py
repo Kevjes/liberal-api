@@ -7,11 +7,13 @@ from app.core.config import settings
 # from app.core.security import get_current_admin
 from app.core.email import send_email
 from app.core.helper import AppHelper
+from app.core.security import get_current_admin
 from app.core.templates.reset_email_successful_template import password_change_alert_template
 from app.core.templates.reset_email_template import reset_email_template
 from app.features.auth.dependencies import get_auth_service
 from app.features.auth.schemas import EmailPasswordRequestForm, PasswordReset, PasswordResetRequest, Token, UserCreate
 from app.features.auth.services import AuthService
+from app.features.users.models import UserModel
 # from app.features.users.models import UserModel
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -20,6 +22,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def signup(
     user_data: UserCreate,
     service: AuthService = Depends(get_auth_service),
+    current_admin: UserModel = Depends(get_current_admin),
 ):
     token = await service.create_user(user_data, is_admin=False)
     return token
@@ -34,7 +37,7 @@ async def login(
 @router.post("/admin/create", response_model=Token)
 async def create_admin(
     user_data: UserCreate,
-    # current_admin: UserModel = Depends(get_current_admin),
+    current_admin: UserModel = Depends(get_current_admin),
     auth_service: AuthService = Depends(get_auth_service),
 ):
     existing_user = await auth_service.repo.get_user_by_email(user_data.email)
@@ -55,22 +58,22 @@ async def forgot_password(
         reset_token = AppHelper.create_reset_token(user.email)
         reset_link = f"https://cli.menosi.net/auth/reset-password?token={reset_token}"
         body = f"""
-Hello {user.first_name},
+Hello {user.email},
 
-You have requested to reset your Menosi CLI password.
+You have requested to reset your Liberal password.
 Please click the following link to reset your password:
 {reset_link}
 
 If you have not requested to reset your password, you can ignore this email.
 
 Sincerely,
-The Menosi CLI Team
+The Liberal Team
 """
         await send_email(
             to=user.email,
-            subject="Resetting your Menosi CLI password",
+            subject="Resetting your Liberal password",
             body= body,
-            html_body=reset_email_template(user.first_name, reset_link, f"{settings.RESET_TOKEN_EXPIRE_MINUTES}", user.email)
+            html_body=reset_email_template(user.email, reset_link, f"{settings.RESET_TOKEN_EXPIRE_MINUTES}", user.email)
         )
         print(f"Reset token for {user.email}: {reset_token}")
     
@@ -105,16 +108,16 @@ async def reset_password(
     body = f"""
 Password Successfully Changed
 
-Hello {user.first_name},
+Hello {user.email},
 
-This email confirms that the password for your Menosi CLI account associated with {user.email} was successfully changed on {reset_time}.
+This email confirms that the password for your Liberal account associated with {user.email} was successfully changed on {reset_time}.
 
 If you did not request this change, please contact our support team immediately to secure your account.
 
 Best regards,
-The Menosi CLI Team
+The Liberal Team
 """
-    body_html = password_change_alert_template(user.first_name, email, reset_time)
+    body_html = password_change_alert_template(user.email, email, reset_time)
     await send_email(email, "Password Reset Successful", body, body_html)
     return {"message": "Password reset successful"}
 

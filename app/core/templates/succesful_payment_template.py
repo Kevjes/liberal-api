@@ -8,7 +8,7 @@ def subscription_confirmation_template(user_first_name: str, user_email: str, pl
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menosi CLI Subscription Confirmation</title>
+    <title>Liberal Subscription Confirmation</title>
     <style>
         body, p, h1, h2, h3 {{
             margin: 0;
@@ -165,7 +165,7 @@ def subscription_confirmation_template(user_first_name: str, user_email: str, pl
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Menosi CLI Logo" class="logo">
+            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Liberal Logo" class="logo">
         </div>
 
         <div class="content">
@@ -173,7 +173,7 @@ def subscription_confirmation_template(user_first_name: str, user_email: str, pl
 
             <p>Hello {user_first_name},</p>
 
-            <p>Thank you for subscribing! Your payment was successful and your Menosi CLI <strong>{plan_name}</strong> plan is now active.</p>
+            <p>Thank you for subscribing! Your payment was successful and your Liberal <strong>{plan_name}</strong> plan is now active.</p>
             
             <div class="details-section">
                 <p><strong>Plan:</strong> {plan_name}</p>
@@ -194,7 +194,7 @@ def subscription_confirmation_template(user_first_name: str, user_email: str, pl
 
         <div class="footer">
             <p>This email was sent to {user_email}</p>
-            <p>© {current_year} Menosi CLI. All rights reserved.</p>
+            <p>© {current_year} Liberal. All rights reserved.</p>
         </div>
     </div>
 </body>

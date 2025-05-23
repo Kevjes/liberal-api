@@ -11,6 +11,10 @@ class MunicipalityRepository:
     async def get_all(self) -> list[MunicipalityModel]:
         result = await self.db.execute(select(MunicipalityModel))
         return list(result.unique().scalars().all())
+    
+    async def get_all_by_department_id(self, department_id: uuid.UUID) -> list[MunicipalityModel]:
+        result = await self.db.execute(select(MunicipalityModel).filter(MunicipalityModel.department_id == department_id))
+        return list(result.unique().scalars().all())
         
     async def get_by_name(self, name: str) -> MunicipalityModel | None:
         result = await self.db.execute(select(MunicipalityModel).filter(MunicipalityModel.name == name))

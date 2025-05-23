@@ -10,9 +10,11 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 import qrcode
+from sqlalchemy.exc import IntegrityError
 
 from app.core.config import settings
 from app.core.email import send_email
+from app.core.helper import AppHelper
 from app.features.cards.models import CardModel
 from app.features.cards.repository import CardRepository
 from app.features.cards.schemas import CardSchema, CreateCardSchema, UpdateCardSchema
@@ -29,6 +31,14 @@ class CardService:
     async def get_all(self) -> List[CardSchema]:
         res = await self.repository.get_all()
         return list(CardSchema.model_validate(card) for card in res)
+    
+    async def get_all_by_department_id(self, department_id: uuid.UUID) -> List[CardSchema]:
+        res = await self.repository.get_all_by_department_id(department_id)
+        return list(CardSchema.model_validate(card) for card in res)
+    
+    async def get_all_by_municipality_id(self, municipality_id: uuid.UUID) -> List[CardSchema]:
+        res = await self.repository.get_all_by_municipality_id(municipality_id)
+        return list(CardSchema.model_validate(card) for card in res)
 
     async def get_by_id(self, id: uuid.UUID) -> CardSchema:
         res = await self.repository.get_by_id(id)
@@ -40,31 +50,65 @@ class CardService:
         return CardSchema.model_validate(res)
 
     async def create(self, schema: CreateCardSchema, image_url: str, creator_id: uuid.UUID) -> CardSchema:
-        model_data = schema.model_dump()
-        model = CardModel(**model_data)
-        model.creator_id = creator_id 
-        model.image_url = image_url
-        created_card = await self.repository.create(model)
-        qr_data_url = f"{settings.DOMAIN_URL}/cards/view/{created_card.id}"
-        created_card.qr_code_url = qr_data_url
-        updated_card_with_qr = await self.repository.update(created_card)
-        return CardSchema.model_validate(updated_card_with_qr)
+        try:
+            last_number = await self.repository.get_last_card_number()
+            new_number = (last_number or 0) + 1
+
+            model_data = schema.model_dump()
+            model = CardModel(**model_data)
+            model.creator_id = creator_id 
+            model.image_url = image_url
+            model.number = new_number
+            created_card = await self.repository.create(model)
+            qr_data_url = f"{settings.DOMAIN_URL}/cards/view/{created_card.id}"
+            created_card.qr_code_url = qr_data_url
+            updated_card_with_qr = await self.repository.update(created_card)
+            return CardSchema.model_validate(updated_card_with_qr)
+        except IntegrityError as e:
+            if "UNIQUE constraint failed: cards.email" in str(e.orig):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered"
+                )
+            elif "UNIQUE constraint failed: cards.number" in str(e.orig):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Card number already exists"
+                )
+            elif "UNIQUE constraint failed: cards.contact" in str(e.orig):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Contact already registered"
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Database error"
+                )
+        except Exception as e:
+            print(f"Error creating card: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create card"
+            )
 
 
-    async def update(self, card_id: uuid.UUID, schema: UpdateCardSchema, image_url: Optional[str]) -> CardSchema:
-        db_card = await self.repository.get_by_id(card_id)
+    async def update(self, schema: UpdateCardSchema, image_url: Optional[str]) -> CardSchema:
+        db_card = await self.repository.get_by_id(schema.id)
         if not db_card:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Card not found"
             )
+        if image_url and db_card.image_url:
+            AppHelper.delete_file_from_url(db_card.image_url)
+            db_card.image_url = image_url
+
         update_data = schema.model_dump(exclude_unset=True)
+
         for key, value in update_data.items():
             if value is not None:
                 setattr(db_card, key, value)
-        
-        if image_url is not None:
-            db_card.image_url = image_url
 
         updated_card = await self.repository.update(db_card)
         return CardSchema.model_validate(updated_card)
@@ -76,6 +120,9 @@ class CardService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Card not found"
             )
+        if model.image_url:
+            AppHelper.delete_file_from_url(model.image_url)
+
         await self.repository.delete(model)
         return None
 
@@ -210,7 +257,7 @@ class CardService:
         subject = f"Votre carte de membre - {card.first_name} {card.last_name}"
         
         # Formatter le numéro de carte avec des zéros en tête (par exemple, pour avoir 6 chiffres)
-        formatted_card_number = f"{card.number:06d}"
+        formatted_card_number = f"{card.number:04d}"
 
         body = (
             f"Bonjour {card.first_name},\n\n"

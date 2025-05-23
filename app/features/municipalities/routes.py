@@ -1,6 +1,8 @@
 import uuid
 from fastapi import APIRouter, Depends
 from app.core.security import get_current_admin
+from app.features.cards.dependencies import get_cards_service
+from app.features.cards.services import CardService
 from app.features.departments.dependencies import get_departments_service
 from app.features.departments.services import DepartmentService
 from app.features.municipalities.dependencies import get_municipalities_service
@@ -30,6 +32,7 @@ async def create_municipality(
   schema: CreateMunicipalitySchema,
   service: MunicipalityService = Depends(get_municipalities_service),
   department_service: DepartmentService = Depends(get_departments_service),
+  admin: UserModel = Depends(get_current_admin)
 ):
   return await service.create(schema, department_service)
 
@@ -43,6 +46,11 @@ async def update_municipalities(
   return await service.update(schema, department_service)
 
 @router.delete("/{id}")
-async def delete_municipalities(id: uuid.UUID, service: MunicipalityService = Depends(get_municipalities_service), admin: UserModel = Depends(get_current_admin)):
-  return await service.delete(id)
+async def delete_municipalities(
+  id: uuid.UUID,
+  service: MunicipalityService = Depends(get_municipalities_service),
+  card_service: CardService = Depends(get_cards_service),
+  admin: UserModel = Depends(get_current_admin)
+):
+  return await service.delete(id, card_service)
 

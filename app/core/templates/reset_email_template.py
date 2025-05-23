@@ -8,7 +8,7 @@ def reset_email_template(user_first_name: str, reset_link: str, expiration_time:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - Menosi CLI</title>
+    <title>Reset Password - Liberal</title>
     <style>
         /* Reset CSS */
         body, p, h1, h2, h3 {{
@@ -166,7 +166,7 @@ def reset_email_template(user_first_name: str, reset_link: str, expiration_time:
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Menosi CLI Logo" class="logo">
+            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Liberal Logo" class="logo">
         </div>
 
         <div class="content">
@@ -174,7 +174,7 @@ def reset_email_template(user_first_name: str, reset_link: str, expiration_time:
 
             <p>Hello {user_first_name},</p>
 
-            <p>You have requested to reset your Menosi CLI password. Please click the following link to reset your password :</p>
+            <p>You have requested to reset your Liberal password. Please click the following link to reset your password :</p>
 
             <p style="text-align: center;"> <a href="{reset_link}" class="reset-button">Reset my password</a>
             </p>
@@ -190,7 +190,7 @@ def reset_email_template(user_first_name: str, reset_link: str, expiration_time:
 
         <div class="footer">
             <p>This email was sent to {user_email}</p>
-            <p>© {current_year} Menosi CLI. All rights reserved.</p>
+            <p>© {current_year} Liberal. All rights reserved.</p>
             </div>
     </div>
 </body>

@@ -12,7 +12,7 @@ router = APIRouter(prefix="/user", tags=["users"])
 @router.get("/all", response_model=list[UsersSchema])
 async def get_all_users(
   service: UsersService = Depends(get_users_service),
-  # current_admin: UserModel = Depends(get_current_admin)
+  current_admin: UserModel = Depends(get_current_admin)
 ):
   return await service.get_all()
 
@@ -28,7 +28,7 @@ async def get_me(service: UsersService = Depends(get_users_service), current_use
 async def get_users_by_email(
   email: str,
   service: UsersService = Depends(get_users_service),
-  # current_admin: UserModel = Depends(get_current_admin)
+  current_admin: UserModel = Depends(get_current_admin)
 ):
   return await service.get_by_email(email)
 

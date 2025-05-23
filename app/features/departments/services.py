@@ -1,3 +1,4 @@
+from app.features.cards.services import CardService
 from app.features.departments.repository import DepartmentRepository
 from app.features.departments.schemas import DepartmentSchema, CreateDepartmentSchema, UpdateDepartmentSchema
 from app.features.departments.models import DepartmentModel
@@ -39,7 +40,12 @@ class DepartmentService:
         model = DepartmentModel(**schema.model_dump(exclude_unset=True))
         return await self.repository.update(model)
 
-    async def delete(self, id: uuid.UUID) -> None:
+    async def delete(self, id: uuid.UUID, card_service: CardService) -> None:
+        if not await card_service.get_all_by_department_id(id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Department is used by cards"
+            )
         model = await self.repository.get_by_id(id)
         return await self.repository.delete(model)
         

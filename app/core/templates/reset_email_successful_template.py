@@ -8,7 +8,7 @@ def password_change_alert_template(user_first_name: str, user_email: str, reset_
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Alert - Menosi CLI Password Changed</title>
+    <title>Security Alert - Liberal Password Changed</title>
     <style>
         body, p, h1, h2, h3 {{
             margin: 0;
@@ -141,7 +141,7 @@ def password_change_alert_template(user_first_name: str, user_email: str, reset_
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Menosi CLI Logo" class="logo">
+            <img src="https://cli.menosi.net/images/logo/white-red.png" alt="Liberal Logo" class="logo">
         </div>
 
         <div class="content">
@@ -149,7 +149,7 @@ def password_change_alert_template(user_first_name: str, user_email: str, reset_
 
             <p>Hello {user_first_name},</p>
 
-            <p>This email confirms that the password for your Menosi CLI account associated with {user_email} was successfully changed on {reset_date_time}.</p>
+            <p>This email confirms that the password for your Liberal account associated with {user_email} was successfully changed on {reset_date_time}.</p>
 
             <p>If you did not request this change, please contact our support team immediately to secure your account.</p>
 
@@ -162,7 +162,7 @@ def password_change_alert_template(user_first_name: str, user_email: str, reset_
 
         <div class="footer">
             <p>This email was sent to {user_email}</p>
-            <p>© {current_year} Menosi CLI. All rights reserved.</p>
+            <p>© {current_year} Liberal. All rights reserved.</p>
         </div>
     </div>
 </body>
