@@ -14,7 +14,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:5173",
-    "http://localhost:1356"
+    "https://cartemembre.ticketvivi.com"
 ]
 
 app.add_middleware(
